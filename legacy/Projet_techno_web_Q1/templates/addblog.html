@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/addblog.css') }}">
+<title>FLIXLIST - Add blog</title>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- <div class="container d-flex justify-content-center mt-5"> -->
+<form action="{{ url_for('flixlist.addblog', mediaId=mediaId) }}" class="p-4" id="blog_form" method="post" novalidate>
+    <div class="form-group row g-0 gy-2 gx-3">
+        <div class="text-center">
+            <label for="newblog">
+                <h2>Add New Blog:</h2>
+            </label>
+            {{ BlogForm.csrf_token }}
+            <div class="error_msg alert alert-danger" role="alert" id="error-csrf_token"></div>
+        </div>
+
+        <div class="col-12">
+            {{ macros.render_field_hidden(BlogForm.rating) }}
+            <div class="rate py-3 text-white mt-3">
+                <div class="rating">
+                    <input type="radio" name="rating" value="5" id="5"><label for="5">☆</label>
+                    <input type="radio" name="rating" value="4" id="4"><label for="4">☆</label>
+                    <input type="radio" name="rating" value="3" id="3"><label for="3">☆</label>
+                    <input type="radio" name="rating" value="2" id="2"><label for="2">☆</label>
+                    <input type="radio" name="rating" value="1" id="1"><label for="1">☆</label>
+                </div>
+            </div>
+            <div class="error_msg text-center" id="error-rating"></div>
+        </div>
+        <div class="col-12 text-center">
+            <a type="button" class="btn btn-outline-warning btn-sm" id="clear_stars">
+                Clear
+            </a>
+        </div>
+        <div class="col-3">
+            {{ macros.get_select_value(BlogForm.state) }}
+            <div class="error_msg" id="error-state"></div>
+        </div>
+        <div class="col-9">
+            {{ macros.render_field(BlogForm.message) }}
+            <div class="error_msg" id="error-message"></div>
+        </div>
+
+        <div class="col text-center">
+            {{ BlogForm.submit(class='mt-4 mx-auto btn btn-secondary', value='Add Blog') }}
+        </div>
+    </div>
+    <input type=hidden value="{{ next or '' }}" name=next>
+</form>
+<!-- </div> -->
+
+{% endblock %}
+
+{% block js_file %}
+"{{ url_for('static', filename='js/addblog.js') }}"
+{% endblock %}

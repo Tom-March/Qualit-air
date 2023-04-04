@@ -1,0 +1,64 @@
+{% extends "root.html" %}
+
+{%block content%}
+    <body>
+        <div class = "container">
+            <h2 class="text-center"> Look for the Qualit-air around you</h2>
+            <br>
+            <!-- redirect to the location route-->
+            <form class="row needs-validation" action = "{{url_for('qualitair.location')}}" method="GET" novalidate>
+                <div class="form-group">
+                    <div class="col-auto">
+                        <input type="text" class="form-control" id="search_input" name="search_input" placeholder="Type address..." required/>
+                        <!-- Error message-->
+                        <div class="invalid-feedback">
+                            An address is required
+                        </div>
+                    </div>
+                    <input type="hidden" id="loc_lat" name = "loc_lat"/>
+                    <input type="hidden" id="loc_long" name = "loc_long"/>
+                    <div class="col-auto">
+                    <button type="submit" style="border-radius:6px; background-color:#adebc5;border:none;padding: 6px 32px;"> Look </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <script>
+            (function() {
+                'use strict';
+                window.addEventListener('load', function() {
+                  // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                  var forms = document.getElementsByClassName('needs-validation');
+                  // Loop over them and prevent submission
+                  var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                      if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                      }
+                      form.classList.add('was-validated');
+                    }, false);
+                  });
+                }, false);
+              })();
+
+            //Get the latitude and longitude of the location
+            var searchInput = 'search_input';
+            $(document).ready(function () {
+             var autocomplete;
+             autocomplete = new google.maps.places.Autocomplete((document.getElementById(searchInput)), {
+              types: ['geocode'],
+             });
+             google.maps.event.addListener(autocomplete, 'place_changed', function () {
+                var near_place = autocomplete.getPlace();
+                document.getElementById('loc_lat').value = near_place.geometry.location.lat();
+                document.getElementById('loc_long').value = near_place.geometry.location.lng();
+            });
+            });
+        </script>
+        <div class = "bottom_content">
+        All of the data used in this application come from the <a href="https://sensor.community/en/">sensor.community</a> 
+        </div>
+    </body>
+{%endblock%}

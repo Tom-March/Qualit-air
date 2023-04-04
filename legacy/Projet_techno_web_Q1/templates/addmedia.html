@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - Add media</title>
+{% endblock %}
+
+
+{% block content %}
+
+<fieldset class="border border-light p-2">
+    <legend>Select media type:</legend>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="add_film" name="filter">
+        <label class="form-check-label" for="add_film">FILM</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="add_series" name="filter">
+        <label class="form-check-label" for="add_series">SERIES</label>
+    </div>
+
+</fieldset><br>
+
+<div id="hiding_before_ready" hidden>
+    <form action="{{ url_for('flixlist.addmedia') }}" class="p-4" id="FilmForm" method="post" enctype="multipart/form-data" novalidate>
+        <div class="form-group">
+            <label for="newfilm">
+                <h2>Add New Film:</h2>
+            </label>
+            {{ filmForm.csrf_token }}
+            <div class="error_msg alert alert-danger" role="alert" id="error-csrf_token"></div>
+
+            {{ macros.render_field(filmForm.title) }}
+            <div class="error_msg" id="film-error-title"></div>
+            {{ macros.render_field(filmForm.description) }}
+            <div class="error_msg" id="film-error-description"></div>
+            {{ macros.render_field(filmForm.year) }}
+            <div class="error_msg" id="film-error-year"></div>
+            {{ macros.render_field(filmForm.duration) }}
+            <div class="error_msg" id="film-error-duration"></div>
+            {{ macros.render_field(filmForm.cat) }}
+            <div class="error_msg" id="film-error-cat"></div>
+            {{ macros.render_field(filmForm.upload) }}
+            <div class="error_msg" id="film-error-upload"></div>
+
+            {{ filmForm.submit(class='mt-4 mx-auto btn btn-secondary', value='Add Film') }}
+        </div>
+        <input type=hidden value="film" name=currentForm>
+    </form>
+
+    <form action="{{ url_for('flixlist.addmedia') }}" class="p-4" id="SeriesForm" method="post" enctype="multipart/form-data" novalidate>
+        <div class="form-group">
+            <label for="newseries">
+                <h2>Add New Series:</h2>
+            </label>
+            {{ seriesForm.csrf_token }}
+            <div class="error_msg alert alert-danger" role="alert" id="error-csrf_token"></div>
+
+            {{ macros.render_field(seriesForm.title) }}
+            <div class="error_msg" id="series-error-title"></div>
+            {{ macros.render_field(seriesForm.description) }}
+            <div class="error_msg" id="series-error-description"></div>
+            {{ macros.render_field(seriesForm.duration) }}
+            <div class="error_msg" id="series-error-duration"></div>
+            {{ macros.render_field(seriesForm.cat) }}
+            <div class="error_msg" id="series-error-cat"></div>
+            {{ macros.render_field(seriesForm.year) }}
+            <div class="error_msg" id="series-error-year"></div>
+            {{ macros.render_field(seriesForm.no_episodes) }}
+            <div class="error_msg" id="series-error-no_episodes"></div>
+            {{ macros.render_field(seriesForm.no_seasons) }}
+            <div class="error_msg" id="series-error-no_seasons"></div>
+            {{ macros.render_field(filmForm.upload) }}
+            <div class="error_msg" id="series-error-upload"></div>
+
+
+            {{ seriesForm.submit(class='mt-4 mx-auto btn btn-secondary', value='Add Series') }}
+
+        </div>
+        <input type=hidden value="series" name=currentForm>
+    </form>
+</div>
+
+{%endblock%}
+
+{% block js_file %}
+"{{ url_for('static', filename='js/addmedia.js') }}"
+{% endblock %}

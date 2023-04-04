@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - Edit person direction</title>
+{% endblock %}
+
+
+{% block content %}
+
+<legend>What piece of media did
+    <a href="{{ url_for('flixlist.peoplepage', id=person.id) }}" class="link-light">
+        {{ person.first_name }} {{ person.last_name }}</a> play in?
+    <a type="button" href="{{ url_for('flixlist.peoplepage',id=person.id) }}"
+        class="btn btn-outline-light btn-sm float-end">
+        Go back
+    </a>
+</legend>
+<div class="input-group">
+    <input id="myInput" type="search" class="form-control rounded" placeholder="Search new media..." aria-label="Search"
+        aria-describedby="search-addon" check_url="{{ url_for('flixlist.peopleplayedin', id=person.id) }}">
+</div>
+<br>
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Poster</th>
+            <th scope="col">Title</th>
+            <th scope="col">Year</th>
+            <th scope="col">Duration</th>
+            <th scope="col">Category</th>
+        </tr>
+    </thead>
+    <tbody id='media-table'>
+        {% for media in medias %}
+        {{ macros.people_edit_playedin_search(media, pictures, person) }}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+
+{%block footer%}
+<div class="text-center p-3">
+    Didn't find what you were looking for? Just add it yourself!
+    <a type="button" class="btn btn-outline-danger" href="{{ url_for('flixlist.addmedia') }}">Here</a>
+</div>
+{% endblock %}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/people_playedin_search.js') }}"
+{% endblock %}

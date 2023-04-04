@@ -1,0 +1,333 @@
+{% macro render_field(field) %}
+<div class="form-group">
+    {{ field.label }}
+    {{ field(class='form-control') }}
+</div>
+{% endmacro %}
+
+
+{% macro render_field_edit(field, value) %}
+<div class="form-group">
+    {{ field.label }}
+    {{ field(class='form-control', value=value) }}
+</div>
+{% endmacro %}
+
+
+{% macro render_field_hidden(field) %}
+<div class="form-group">
+    {{ field(class='form-control', hidden=true) }}
+</div>
+{% endmacro %}
+
+
+{% macro get_select_value(field) %}
+<div class="form-group">
+    {{ field.label }}
+    <select class="form-select" {{field(value=value)}} aria-label="Default select example">
+        <option id="selectFieldForState0" value="0">Completed</option>
+        <option id="selectFieldForState1" value="1">Watching</option>
+        <option id="selectFieldForState2" value="2">Planning to watch</option>
+        <option id="selectFieldForState3" value="3">Abandonned</option>
+        <option id="selectFieldForState4" value="4" selected>Not categorized yet</option>
+    </select>
+
+
+</div>
+{% endmacro %}
+
+
+{% macro management_row(user,pictures) %}
+<tr admin_link="{{ url_for('flixlist.anotheruserprofile', username=user.id) }}">
+    {% if pictures[user.id] is none %}
+    <td>
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="Media image"
+            width=100 height=100>
+    </td>
+    {% else %}
+    <td>
+        <img src="../static/img/profile/{{pictures[user.id]}}" class="img-thumbnail" alt="Media image" width=100
+            height=100>
+    </td>
+    {% endif %}
+    <td>{% if not user.active %}<del>{% endif %}{{ user.first_name }} {{ user.last_name }} [{{ user.username }}] ({{
+            user.bday.strftime("%d/%m/%Y")}})<br>{{ user.id }}{% if not user.active %}</del>{% endif %}</td>
+    <td>
+        {% if user.active %}
+        <a class="btn btn-danger" role="button" id="block_{{ user.id }}" user_id="{{ user.id }}"
+            reload="{{ url_for('flixlist.adminboard') }}">
+            Block
+        </a>
+        {% else %}
+        <a class="btn btn-outline-danger" role="button" id="block_{{ user.id }}" user_id="{{ user.id }}"
+            reload="{{ url_for('flixlist.adminboard') }}">
+            Unblock
+        </a>
+        {% endif %}
+        <a class="btn btn-info" role="button" id="change_group_{{ user.id }}" user_id="{{ user.id }}"
+            reload="{{ url_for('flixlist.adminboard') }}">
+            Change Group
+        </a>
+    </td>
+</tr>
+{% endmacro %}
+
+
+{% macro list_row(blog,media,pictures) %}
+<tr link="{{ url_for('flixlist.mediapage', id=media.id) }}">
+    {% if pictures[media.id] is none %}
+    <td>
+        <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=100
+            height=100>
+    </td>
+    {% else %}
+    <td>
+        <img src="../static/img/media/{{pictures[media.id]}}" class="img-thumbnail" alt="Media image" width=100
+            height=100>
+    </td>
+    {% endif %}
+    <td>{{ media.title }}</td>
+    <td>{{ blog.rating }}</td>
+    <td>{{ blog.message }}</td>
+    <td>{% if blog.state == 0 %} {{ "Completed" }}
+        {% elif blog.state == 1 %} {{ "Watching" }}
+        {% elif blog.state == 2 %} {{ "Planning to watch" }}
+        {% elif blog.state == 3 %} {{ "Abandonned" }}
+        {% else %} {{ "Not categorized yet" }} {% endif %}
+    </td>
+    <td>{{ blog.date.strftime('%x %X') }}</td>
+    <td>
+        <a class="btn btn-outline-primary" href="{{ url_for('flixlist.modifyblog', id=blog.id) }}" role="button">
+            Modify
+        </a>
+        <a class="btn btn-outline-danger" href="{{ url_for('flixlist.deleteblog', id=blog.id) }}" role="button">
+            Delete
+        </a>
+    </td>
+</tr>
+{% endmacro %}
+
+
+{% macro blog_row(blog) %}
+<tr>
+    <td>{{ blog.Account_email }}</td>
+    <td>{{ blog.rating }}</td>
+    <td>{{ blog.message }}</td>
+    <td>{% if blog.state == 0 %} {{ "Completed" }}
+        {% elif blog.state == 1 %} {{ "Watching" }}
+        {% elif blog.state == 2 %} {{ "Planning to watch" }}
+        {% elif blog.state == 3 %} {{ "Abandonned" }}
+        {% else %} {{ "Not categorized yet" }} {% endif %}
+    </td>
+    <td>{{ blog.date.strftime('%x %X') }}</td>
+</tr>
+{% endmacro%}
+
+
+{% macro user_blog_row(user_post, media_titles) %}
+<tr media_link="{{ url_for('flixlist.mediapage', id=media_titles[user_post.id].id) }}">
+    <td>{{ media_titles[user_post.id].title }}</td>
+    <td>{{ user_post['rating'] }}</td>
+    <td>{{ user_post['message'] }}</td>
+    <td>{{ user_post['date'].strftime('%x %X') }}</td>
+</tr>
+{% endmacro %}
+
+
+{% macro media_blog_row(user_review, usernames) %}
+<tr>
+    <td>{{ user_review.rating }}</td>
+    <td>{{ user_review.message }}</td>
+    <td>{{ usernames[user_review.Account_email] }}</td>
+    <td>{{ user_review.date.strftime('%x %X') }}</td>
+</tr>
+{% endmacro %}
+
+
+{% macro media_row_auth(media, pictures) %}
+<tr href="{{ url_for('flixlist.mediapage', id=media.id) }}">
+    {% if pictures[media.id] is none %}
+    <td>
+        <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=100
+            height=100>
+    </td>
+    {% else %}
+    <td>
+        <img src="../static/img/media/{{ pictures[media.id] }}" class="img-thumbnail" alt="Media image" width=100
+            height=100>
+    </td>
+    {% endif %}
+    <td>{{ media.title }}</td>
+    <td>{{ media.year }}</td>
+    <td>{{ media.duration }}</td>
+    <td>{{ media.category }}</td>
+    <td>
+        <!-- <a type="button" class="btn btn-outline-primary">VIEW</a> -->
+        <a id="addlist_{{ media.id }}" media_id="{{ media.id }}" check_url="{{ url_for('flixlist.get_blog_current') }}"
+            type=" button" class="btn btn-danger" href="{{ url_for('flixlist.addlist', mediaId=media.id) }}">ADD</a>
+    </td>
+</tr>
+{% endmacro %}
+
+
+{% macro media_row_anon(media, pictures) %}
+<tr href="{{ url_for('flixlist.mediapage', id=media.id) }}">
+    {% if pictures[media.id] is none %}
+    <td>
+        <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=100
+            height=100>
+    </td>
+    {% else %}
+    <td>
+        <img src="../static/img/media/{{ pictures[media.id] }}" class="img-thumbnail" alt="Media image" width=100
+            height=100>
+    </td>
+    {% endif %}
+    <td>{{ media.title }}</td>
+    <td>{{ media.year }}</td>
+    <td>{{ media.duration }}</td>
+    <td>{{ media.category }}</td>
+</tr>
+{% endmacro %}
+
+
+{% macro review_row(review,info) %}
+{% if info[review.id][2] is not none %}
+<tr user_profile="{{ url_for('flixlist.usermessages', username=info[review.id][2]) }}">
+    {% else %}
+<tr user_profile="{{ url_for('flixlist.usermessages', username=info[review.id][3]) }}">
+    {% endif %}
+    <td>{{ info[review.id][4] }}</td>
+    <td>{{ review.rating }}</td>
+    <td>{{ review.message }}</td>
+    {% if info[review.id][2] is none %}
+    <td>{{ info[review.id][0] }} {{ info[review.id][1] }}</td>
+    {% else %}
+    <td>{{ info[review.id][2] }}</td>
+    {% endif %}
+    <td>{{ review.date.strftime("%x %X") }}</td>
+</tr>
+{% endmacro %}
+
+
+{% macro searchpeople_row(person, pictures) %}
+<tr action="{{ url_for('flixlist.peoplepage', id=person.id) }}">
+    {% if pictures[person.id] is none %}
+    <td>
+        <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=150>
+    </td>
+    {% else %}
+    <td>
+        <img src="../static/img/people/{{ pictures[person.id] }}" class="img-thumbnail" alt="Media image" width=150>
+    </td>
+    {% endif %}
+    <td>{{ person.first_name }} {{ person.last_name }}</td>
+    <td>{{ person.bday.strftime('%x') }}</td>
+</tr>
+{% endmacro %}
+
+
+{% macro searchusers_row(user, pictures) %}
+{% if user.username %}
+<tr action="{{ url_for('flixlist.anotheruserprofile', username=user.username) }}">
+    {% else %}
+<tr action="{{ url_for('flixlist.anotheruserprofile', username=user.id) }}">
+    {% endif %}
+    {% if pictures[user.id] is none %}
+    <td>
+        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="Media image"
+            width=150>
+    </td>
+    {% else %}
+    <td>
+        <img src="../../static/img/profile/{{ pictures[user.id] }}" class="img-thumbnail" alt="Media image" width=150>
+    </td>
+    {% endif %}
+    <td>{{ user.first_name }} {{ user.last_name }}</td>
+    {% if user.username %}
+    <td>{{ user.username }}</td>
+    {% else %}
+    <td></td>
+    {% endif %}
+    <td>{{ user.bday.strftime('%x') }}</td>
+</tr>
+{% endmacro %}
+
+{% macro report_row(report,media_title, media_ids) %}
+<tr media_action="{{ url_for('flixlist.mediapage', id=media_ids[report.id]) }}">
+    <td>{{ media_title[report.id] }}</td>
+    <td>{{ report.Account_email }}</td>
+    <td>{{ report.message }}</td>
+    <td>
+        <a type=" button" class="btn btn-outline-success"
+            href="{{ url_for('flixlist.completeflags', id=report.id) }}">Completed</a>
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro report_people_row(report,people_name, people_ids) %}
+<tr media_action="{{ url_for('flixlist.peoplepage', id=people_ids[report.id]) }}">
+    <td>{{ people_name[report.id] }}</td>
+    <td>{{ report.Account_email }}</td>
+    <td>{{ report.message }}</td>
+    <td>
+        <a type=" button" class="btn btn-outline-success"
+            href="{{ url_for('flixlist.completeflags', id=report.id) }}">Completed</a>
+    </td>
+</tr>
+{% endmacro %}
+
+
+{% macro people_did(media) %}
+<a class="link-light fs-4" href="{{ url_for('flixlist.mediapage', id=media.id) }}">{{ media.title }}</a><br>
+{% endmacro %}
+
+
+{% macro people_edit_directed_search(media, pictures, person) %}
+<tr href="{{ url_for('flixlist.mediapage', id=media.id) }}">
+    {% if pictures[media.id] is none %}
+    <td>
+        <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=100
+            height=100>
+    </td>
+    {% else %}
+    <td>
+        <img src="../../static/img/media/{{ pictures[media.id] }}" class="img-thumbnail" alt="Media image" width=100
+            height=100>
+    </td>
+    {% endif %}
+    <td>{{ media.title }}</td>
+    <td>{{ media.year }}</td>
+    <td>{{ media.duration }}</td>
+    <td>{{ media.category }}</td>
+    <td>
+        <a id="addlist_{{ media.id }}" media_id="{{ media.id }}" type=" button" class="btn btn-danger"
+            href="{{ url_for('flixlist.peopletoggledirect', id=person.id) }}">ADD</a>
+    </td>
+</tr>
+{% endmacro %}
+
+
+{% macro people_edit_playedin_search(media, pictures, person) %}
+<tr href="{{ url_for('flixlist.mediapage', id=media.id) }}">
+    {% if pictures[media.id] is none %}
+    <td>
+        <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=100
+            height=100>
+    </td>
+    {% else %}
+    <td>
+        <img src="../../static/img/media/{{ pictures[media.id] }}" class="img-thumbnail" alt="Media image" width=100
+            height=100>
+    </td>
+    {% endif %}
+    <td>{{ media.title }}</td>
+    <td>{{ media.year }}</td>
+    <td>{{ media.duration }}</td>
+    <td>{{ media.category }}</td>
+    <td>
+        <a id="addlist_{{ media.id }}" media_id="{{ media.id }}" type=" button" class="btn btn-danger"
+            href="{{ url_for('flixlist.peopletoggleplay', id=person.id) }}">ADD</a>
+    </td>
+</tr>
+{% endmacro %}

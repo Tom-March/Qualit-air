@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - Edit People</title>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="d-flex align-items-center">
+        <div class="flex-shrink-0">
+            {% if picture is none %}
+            <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=400>
+            {% else %}
+            <img src="../../static/img/people/{{ picture }}" alt="Media image" width=400>
+            {% endif %}
+        </div>
+        <div class="flex-grow-1 flex-column ms-3">
+            <form action="{{ url_for('flixlist.editpeople',id=people_id) }}" class="p-4" method="post" id="people_form"
+                novalidate>
+                <div class="form-group">
+                    <label for="newpeople">
+                        <h2>
+                            Edit person:
+                            <a href="{{ url_for('flixlist.peoplepage',id=people_id) }}" class="link-light">
+                                {{info["firstname"]}} {{info["lastname"]}}
+                            </a>
+                        </h2>
+                    </label>
+                    {{ peopleForm.csrf_token }}
+                    <div class="error_msg" role="alert" id="error-csrf_token"></div>
+
+                    {{ macros.render_field_edit(peopleForm.firstName,info["firstname"]) }}
+                    <div class="error_msg" id="error-firstName"></div>
+                    {{ macros.render_field_edit(peopleForm.lastName,info["lastname"]) }}
+                    <div class="error_msg" id="error-lastName"></div>
+                    {{ macros.render_field_edit(peopleForm.bday,info["bday"]) }}
+                    <div class="error_msg" id="error-bday"></div>
+                    {{ macros.render_field_edit(peopleForm.upload) }}
+                    <div class="error_msg" id="error-upload"></div>
+
+                    <br>
+
+                    {{ peopleForm.submit(class='mt-4 mx-auto btn btn-secondary', value='Edit People') }}
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/editpeople.js') }}"
+{% endblock %}

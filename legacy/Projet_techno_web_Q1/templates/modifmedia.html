@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - Edit media</title>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="d-flex align-items-center">
+        <div class="flex-shrink-0">
+            {% if picture is none %}
+            <img src="https://images.emojiterra.com/google/android-11/512px/2753.png" alt="Media image" width=400>
+            {% else %}
+            <img src="../../static/img/media/{{ picture }}" alt="Media image" width=400>
+            {% endif %}
+        </div>
+        <div class="flex-grow-1 flex-column ms-3">
+            {%if isfilm %}
+            <form action="{{ url_for('flixlist.editmedia',id=media_id )}}" class="p-4" id="modifForm" method="post"
+                enctype="multipart/form-data" novalidate>
+                <div class="form-group">
+                    <label for="newfilm">
+                        <h2>Edit Film:
+                            <a href="{{ url_for('flixlist.mediapage',id=media_id )}}" class="link-light">
+                                {{ info["title"] }}</a>
+                        </h2>
+                    </label>
+                    {{ form.csrf_token }}
+                    <div class="error_msg" role="alert" id="error-csrf_token"></div>
+
+                    {{ macros.render_field_edit(form.title,info["title"]) }}
+                    <div class="error_msg" id="error-title"></div>
+                    {{ macros.render_field_edit(form.description,info["description"]) }}
+                    <div class="error_msg" id="error-description"></div>
+                    {{ macros.render_field_edit(form.year,info["year"]) }}
+                    <div class="error_msg" id="errorf"></div>
+                    {{ macros.render_field_edit(form.duration,info["duration"]) }}
+                    <div class="error_msg" id="error-duration"></div>
+                    {{ macros.render_field_edit(form.cat,info["category"]) }}
+                    <div class="error_msg" id="error-cat"></div>
+                    {{ macros.render_field_edit(form.upload,info["upload"]) }}
+                    <div class="error_msg" id="error-upload"></div>
+
+                    {{ form.submit(class='mt-4 mx-auto btn btn-secondary', value='Edit Film') }}
+                </div>
+            </form>
+            {%else%}
+            <form action="{{ url_for('flixlist.editmedia',id=media_id )}}" class="p-4" id="modifForm" method="post"
+                enctype="multipart/form-data" novalidate>
+                <div class="form-group">
+                    <label for="newseries">
+                        <h2>Edit Series:
+                            <a href="{{ url_for('flixlist.mediapage',id=media_id )}}" class="link-light">
+                                {{ info["title"] }}</a>
+                        </h2>
+                    </label>
+                    {{ form.csrf_token }}
+                    <div class="error_msg" role="alert" id="error-csrf_token"></div>
+
+                    {{ macros.render_field_edit(form.title,info["title"]) }}
+                    <div class="error_msg" id="error-title"></div>
+                    {{ macros.render_field_edit(form.description,info["description"]) }}
+                    <div class="error_msg" id="error-description"></div>
+                    {%if info["duration2"] is none%}
+                    {{ macros.render_field_edit(form.duration,info["duration"]) }}
+                    {%else%}
+                    {{ macros.render_field_edit(form.duration,info["duration"]~'-'~info["duration2"]) }}
+                    {%endif%}
+                    <div class="error_msg" id="error-duration"></div>
+                    {{ macros.render_field_edit(form.cat,info["category"]) }}
+                    <div class="error_msg" id="error-cat"></div>
+                    {%if info["year_end"] is none%}
+                    {{ macros.render_field_edit(form.year,info["year"]) }}
+                    {%else%}
+                    {{ macros.render_field_edit(form.year,info["year"]~'-'~info["year_end"]) }}
+                    {%endif%}
+                    <div class="error_msg" id="error-year"></div>
+                    {{ macros.render_field_edit(form.no_episodes,info["no_episodes"]) }}
+                    <div class="error_msg" id="error-no_episodes"></div>
+                    {{ macros.render_field_edit(form.no_seasons,info["no_seasons"]) }}
+                    <div class="error_msg" id="error-no_seasons"></div>
+                    {{ macros.render_field_edit(form.upload,info["upload"]) }}
+                    <div class="error_msg" id="error-upload"></div>
+
+                    {{ form.submit(class='mt-4 mx-auto btn btn-secondary', value='Edit Series') }}
+                </div>
+            </form>
+            {%endif%}
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/editmedia.js') }}"
+{% endblock %}

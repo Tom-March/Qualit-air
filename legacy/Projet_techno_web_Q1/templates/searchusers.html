@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - Search for people</title>
+{% endblock %}
+
+
+{% block link_searchusers %}
+{% endblock %}
+
+
+{% block content %}
+
+<legend>Search for someone</legend>
+<div class="input-group">
+    <input id="myInput" type="search" class="form-control rounded" placeholder="Search new media..." aria-label="Search"
+        aria-describedby="search-addon">
+</div>
+<br>
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Profile picture</th>
+            <th scope="col">Name</th>
+            <th scope="col">Username</th>
+            <th scope="col">Birthday</th>
+        </tr>
+    </thead>
+    <tbody id='users-table'>
+        {% for user in users %}
+        {{ macros.searchusers_row(user, pictures) }}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/searchusers.js') }}"
+{% endblock %}

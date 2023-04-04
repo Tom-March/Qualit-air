@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - My list</title>
+{% endblock %}
+
+
+{% block link_mylist %}
+<a class="nav-link active" aria-current="page" href="{{ url_for('flixlist.root') }}">My list</a>
+{% endblock %}
+
+
+{% block content %}
+{% if current_user.is_authenticated %}
+<h1>{% if current_user.isBirthday() %}Happy birthday{% else %}Hello{% endif %} {{ current_user.first_name }}!</h1>
+{% else %}
+<h1>Hello anonymous!</h1>
+{% endif %}
+<hr>
+{% if current_user.is_authenticated %}
+<h4>Search in your list</h4>
+<input id="myInput" type="search" class="form-control rounded" placeholder="Search media..." aria-label="Search"
+    aria-describedby="search-addon" />
+<br><br>
+
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Poster</th>
+            <th scope="col">Title</th>
+            <th scope="col">Rating</th>
+            <th scope="col">Message</th>
+            <th scope="col">State</th>
+            <th scope="col">Date</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody id="myTable">
+        {% for blog in blogs %}
+        {% if blog.Account_email == current_user.id %}
+        {% for media in medias%}
+        {% if media.id == blog.Media_id%}
+        {{ macros.list_row(blog,media,pictures) }}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="text-center">
+    <p class="fs-5 fw-bold">Want to add a movie or a series to your very own personal list?</p>
+    {{ super() }}
+</div>
+{% endif %}
+{% endblock %}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/list.js') }}"
+{% endblock %}

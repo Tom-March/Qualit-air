@@ -1,0 +1,66 @@
+<!--affiche les post pr un user
+faire un 2e html pr chaque film afficher les posts-->
+
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block header %}
+<title>FLIXLIST - Posts about movies/series </title>
+{% endblock %}
+
+
+{% block content %}
+{% if type=='media' %}
+<div class="text-center">
+    <h1>Reviews for
+        <a href="{{ url_for('flixlist.mediapage', id=media.id) }}" class="link-light">{{ media.title }}</a>
+    </h1>
+</div>
+<hr>
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Rating</th>
+            <th scope="col">Review</th>
+            <th scope="col">User</th>
+            <th scope="col">Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user_review in user_reviews %}
+        {{ macros.media_blog_row(user_review, usernames) }}
+        {% endfor %}
+    </tbody>
+</table>
+{% elif type=='user' %}
+{% if user.username is none %}
+<h1>
+    <a href="{{ url_for('flixlist.anotheruserprofile', username=username) }}" class="link-light">
+        {{ user.first_name }} {{user.last_name }}</a>'s media reviews
+</h1>
+{% else %}
+<h1>{{ user.username }}'s media reviews</h1>
+{% endif %}
+<hr>
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Media title</th>
+            <th scope="col">Rating</th>
+            <th scope="col">Review</th>
+            <th scope="col">Date</th>
+        </tr>
+    </thead>
+    <tbody id="usertbody">
+        {% for user_post in user_posts %}
+        {{ macros.user_blog_row(user_post, media_titles) }}
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/message.js') }}"
+{% endblock %}

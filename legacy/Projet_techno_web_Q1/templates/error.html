@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block header %}
+<style>
+    body {
+        overflow: hidden;
+        /* Hide scrollbars */
+    }
+</style>
+<title>{{ status_code }} {{ status_name }}</title>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center vh-100">
+    <div class="text-center">
+        <h1 class="display-1 fw-bold">{{ status_code }}</h1>
+        <p class="fs-3"> <span class="text-danger">Oops!</span> {{ status_name }}</p>
+        <p class="lead">{{ description }}</p>
+        <hr>
+        {% if status_code == 403 %}
+        {% if current_user.active %}
+        <a href="{{ url_for('flixlist.root') }}" role="button" class="btn btn-outline-light">Return to Main page</a>
+        {% else %}
+        <a href="{{ url_for('flixlist.logout') }}" role="button" class="btn btn-danger">Logout</a>
+        {% endif %}
+        {% else %}
+        {{ super() }}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

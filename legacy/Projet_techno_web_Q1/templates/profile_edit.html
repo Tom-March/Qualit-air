@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - Edit Profile</title>
+{% endblock %}
+
+
+{% block navbar_superclass %}
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <nav aria-label="breadcrumb" class="bg-dark bg-gradient rounded-3 p-3 mb-0">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('flixlist.root') }}" class="link-light">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('flixlist.userprofile') }}" class="link-light">User Profile</a>
+                </li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Edit Profile</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<form action="{{ url_for('flixlist.editprofile') }}" class="p-4" method="post" id="editForm" novalidate>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card mb-4 bg-dark bg-gradient">
+                <div class="card-body text-center">
+                    {% if picture is none %}
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+                        class="rounded-circle img-fluid" style="width: 150px;">
+                    {% else %}
+                    <img src="../static/img/profile/{{ picture }}" alt="avatar" class="rounded-circle img-fluid"
+                        style="width: 150px;">
+                    {% endif %}
+                    <h5 class="my-3">{{ current_user.first_name }} {{ current_user.last_name }}</h5>
+                    <p class="text-white-50 fw-light mb-1">
+                        {% if current_user.is_admin %}
+                        Administrator
+                        {% else %}
+                        Normal user
+                        {% endif %}
+                    </p>
+                    {{ macros.render_field(form.upload) }}
+                    <div class="error_msg" id="upload_error"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card mb-4 bg-dark bg-gradient">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Full Name</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-white text-opacity-75 mb-0">{{ current_user.first_name }} {{
+                                current_user.last_name }}</p>
+                        </div>
+                    </div>
+                    {% if current_user.username is not none %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Username</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-white text-opacity-75 mb-0">{{ current_user.username }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Email</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-white text-opacity-75 mb-0">{{ current_user.id }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <p class="mb-0">Birthday</p>
+                        </div>
+                        <div class="col-sm-9">
+                            <p class="text-white text-opacity-75 mb-0">{{ current_user.bday.strftime('%B %#d, %Y') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <a class="btn btn-danger btn-lg" href="{{ url_for('flixlist.editprofilepassword') }}" role="button">
+                    Change password
+                </a>
+            </div>
+        </div>
+        <div class="form-group row g-0 gy-2 gx-3">
+            {{ form.csrf_token }}
+            <div class="error_msg" role="alert" id="csrf_token_error"></div>
+            <label for="profileedit">
+                <h2>Edit my profile</h2>
+            </label>
+            <div class="col-md-7">
+                {{ macros.render_field_edit(form.email, current_user.id) }}
+                <div class="error_msg" id="email_error"></div>
+            </div>
+            <div class="col-md-5">
+                {% if current_user.username is none %}
+                {{ macros.render_field(form.username) }}
+                {% else %}
+                {{ macros.render_field_edit(form.username, current_user.username) }}
+                {% endif %}
+                <div class="error_msg" id="username_error"></div>
+            </div>
+            <div class="col-md-5">
+                {{ macros.render_field_edit(form.firstName, current_user.first_name) }}
+                <div class="error_msg" id="firstName_error"></div>
+            </div>
+            <div class="col-md-5">
+                {{ macros.render_field_edit(form.lastName, current_user.last_name) }}
+                <div class="error_msg" id="lastName_error"></div>
+            </div>
+            <div class="col-md-2">
+                {{ macros.render_field_edit(form.bday, current_user.bday) }}
+                <div class="error_msg" id="bday_error"></div>
+            </div>
+
+            <div class="col-md-12">
+                {{ form.submit(class='mt-4 mx-auto btn btn-secondary w-100') }}
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+
+{% block js_file %}"{{ url_for('static', filename='js/profile_edit.js') }}"{% endblock %}

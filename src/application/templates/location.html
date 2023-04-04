@@ -1,0 +1,673 @@
+{% extends "root.html" %}
+
+{%block content%}
+<body>
+    <div class = "container text-center">
+      <div class="row align-items-start">
+        <div class = "row">
+          <h1 id = "address"></h1>
+          <h6>Select the size of the area around your location:</h6>  
+        </div>
+      </div>
+      <!-- radio buttons to change the size of the area-->
+      <div class = " mb-5 text-center">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" onclick = "get_graph(2)" name="inlineRadioOptions" id="inlineRadio1" value="option1" disabled>
+          <label class="form-check-label" for="inlineRadio1">2 kms</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" onclick = "get_graph(5)" name="inlineRadioOptions" id="inlineRadio2" value="option2" checked>
+          <label class="form-check-label" for="inlineRadio2">5 kms</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" onclick = "get_graph(10)" name="inlineRadioOptions" id="inlineRadio3" value="option3" disabled>
+          <label class="form-check-label" for="inlineRadio3">10 kms</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" onclick = "get_graph(15)" name="inlineRadioOptions" id="inlineRadio4" value="option4" disabled>
+          <label class="form-check-label" for="inlineRadio4">15 kms</label>
+        </div>
+      </div>
+      <div class = "container mb-3">
+        <h6 id="mean"></h6><h6 id = "nb_sensors"></h6>
+      </div>
+        <div class="row align-items-start">
+        <div class="col">
+          <!-- Chart of PM2.5-->
+          <div>
+            <canvas id="Linechart25"></canvas>
+          </div>
+          <!-- Chart of Temperatures-->
+          <div>
+            <canvas id="LinechartTemperature"></canvas>
+          </div>
+        </div>
+        <div class = "col">
+          <!-- Chart of PM10-->
+          <div>
+            <canvas id="Linechart10"></canvas>
+          </div>
+          <!-- CHart of Humidity-->
+          <div>
+            <canvas id="LinechartHumidity"></canvas>
+          </div>
+        </div>
+    </div>
+    <script>
+      /**
+      * This function returns the value of the parameter in the URL.
+      *
+      * @author Marchal Tom
+      * @param parameterName The name of the parameter in the URL that we want to get the value.
+      * @return The value of the parameter given.
+      * @precondition parameterName must be a parameter in the URL
+      * @postcondition 
+      */
+      function getParameters(parameterName) {
+          let parameters = new URLSearchParams( window.location.search);
+          return parameters.get( parameterName);
+      }
+      var lat = getParameters('loc_lat');
+      var long = getParameters('loc_long');
+    
+      document.getElementById("address").innerHTML = getParameters("search_input");
+
+      /**
+      * This function gives the distance in km between two differents geographic points representated with their latitude & longitude
+      * using the Haversine formula.
+      *
+      * @author Marchal Tom
+      * @param lat1 The latitude of the first geographic point
+      * @param long1 The longitude of the first geographic point
+      * @param lat2 The latitude of the second geographic point
+      * @param long2 The longitude of the second geographic point
+      * @return distance the distance between the two points in km
+      * @see #deg2rad(deg)
+      * @precondition lat1 & lat2 must be valid latitudes
+      * @precondition long1 & long2 must be valid longitudes
+      * @postcondition distance The distance between the two points using the Haversine formula
+      */
+      function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+          var R = 6371; // Radius of the earth in km
+          var dLat = deg2rad(lat2-lat1);  // deg2rad below
+          var dLon = deg2rad(lon2-lon1); 
+          var a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2)
+            ; 
+          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+          var distance = R * c; // Distance in km
+          return distance;
+        }
+      
+      /**
+      * This function transforms a degree value in a radian value.
+      *
+      * @author Marchal Tom
+      * @param deg The degree value
+      * @return The value given in parameter in a radian value
+      * @precondition deg must be a correct degree value (between 0 and 360)
+      * @postcondition The radian value of the degree given
+      */
+      function deg2rad(deg) {
+        return deg * (Math.PI/180)
+      }
+
+      //Create the firsts charts
+      var chart1,chart2,chart3,chart4;
+      fetch('https://data.sensor.community/static/v2/data.json')
+        .then(res => res.json())
+        .then(all_data => {
+          var sensors = [];
+          for (const data in all_data){
+            var lat_data = all_data[data].location.latitude;
+            var long_data = all_data[data].location.longitude;
+            if (getDistanceFromLatLonInKm(lat,long,lat_data,long_data) < 5){
+              sensors.push(all_data[data]);
+            }
+          }
+
+          //PM2.5 Chart
+          //setup
+          var labels = getDataPm25(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'PM 2.5',
+              data: getDataPm25(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "µg/m\u00b3"
+                  }
+                }
+                
+              }
+            }
+          };
+          //init
+          var Linechart25 = new Chart(
+            document.getElementById('Linechart25'),
+            config
+          );
+          chart1 = get(Linechart25);
+          console.assert(chart1.ctx != null, "The chart has not been created");
+          var mean25 = getMean(labels);
+  
+          //PM10 Chart
+          //setup
+          var labels = getDataPm10(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'PM 10',
+              data: getDataPm10(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "µg/m\u00b3"
+                  }
+                }
+              }
+            }
+          };
+          //init
+          var Linechart10 = new Chart(
+            document.getElementById('Linechart10'),
+            config
+          );
+          chart2 = get(Linechart10);
+          console.assert(chart2.ctx != null, "The chart has not been created");
+          var mean10 = getMean(labels);
+          
+          //Indicates the quality of air
+          if (mean25 < 110 && mean10 < 180){
+            document.getElementById("mean").innerHTML = "The quality of air is very poor";
+            if (mean25 < 55 && mean10 < 90){
+              document.getElementById("mean").innerHTML = "The quality of air is Poor";
+              if (mean25 < 30 && mean10 < 50){
+                document.getElementById("mean").innerHTML = "The quality of air is Moderate";
+                if (mean25 < 15 && mean10 < 25){
+                  document.getElementById("mean").innerHTML = "The quality of air is Fine";
+                  if (mean25 < 7 && mean10 < 12){
+                    document.getElementById("mean").innerHTML = "The quality of air is Excellent";
+                  }
+                }
+              }
+            }
+          }
+          else{
+            document.getElementById("mean").innerHTML = "The quality of air is severe";
+          }
+          
+          //Calulate the number of sensors used
+          var length25 = getDataPm25(sensors).length;
+          var length10 = getDataPm10(sensors).length;
+          if (length25 <= length10){
+            if (length10 > 0){
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensors has been used during the analysis"
+            }
+            else{
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensor has been used during the analysis"
+            }
+          }
+          else{
+            if (length25 > 0){
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensors has been used during the analysis"
+            }
+            else{
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensor has been used during the analysis"
+            }
+          }
+
+          //Temperatures Chart
+          //setup
+          var labels = getTemperature(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'Temperatures',
+              data: getTemperature(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "°C"
+                  }
+                }
+              }
+            }
+          };
+          //init
+          var LinechartTemperature = new Chart(
+            document.getElementById('LinechartTemperature'),
+            config
+          );
+          chart3 = get(LinechartTemperature);
+          console.assert(chart3.ctx != null, "The chart has not been created");
+
+          //Humidity chart
+          //setup
+          var labels = getHumidity(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'Humidity',
+              data: getHumidity(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "%"
+                  }
+                }
+              }
+            }
+          };
+          //init
+          var LinechartHumidity = new Chart(
+            document.getElementById('LinechartHumidity'),
+            config
+          );
+          chart4 = get(LinechartHumidity);
+          console.assert(chart4.ctx != null, "The chart has not been created");
+
+          // Give access to the other options after the firsts graphs are displayed
+          document.getElementById("inlineRadio1").disabled = false;
+          document.getElementById("inlineRadio3").disabled = false;
+          document.getElementById("inlineRadio4").disabled = false;
+        });
+       
+      /**
+      * This function updates the graphs displayed on the page to have the correct graph in function of the parameter given.
+      *
+      * @author Marchal Tom
+      * @param km The size of the area around the geographic point where we take the data
+      * @precondition all the charts must have already been displayed once before
+      * @postcondition display all the new charts
+      */
+      function get_graph(km){
+        //Remove all the charts to create new ones
+        chart1.destroy();
+        console.assert(chart1.ctx == null, "The chart has not been destroyed");
+        chart2.destroy();
+        console.assert(chart2.ctx == null, "The chart has not been destroyed");
+        chart3.destroy();
+        console.assert(chart3.ctx == null, "The chart has not been destroyed");
+        chart4.destroy();
+        console.assert(chart4.ctx == null, "The chart has not been destroyed");
+        fetch('https://data.sensor.community/static/v2/data.json')
+          .then(res => res.json())
+          .then(all_data => {
+            var sensors = [];
+            for (const data in all_data){
+              var lat_data = all_data[data].location.latitude;
+              var long_data = all_data[data].location.longitude;
+              if (getDistanceFromLatLonInKm(lat,long,lat_data,long_data) < km){
+                sensors.push(all_data[data]);
+              }
+            }
+            
+            //PM2.5 Chart
+          //setup
+          var labels = getDataPm25(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'PM 2.5',
+              data: getDataPm25(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "µg/m\u00b3"
+                  }
+                }
+                
+              }
+            }
+          };
+          //init
+          var Linechart25 = new Chart(
+            document.getElementById('Linechart25'),
+            config
+          );
+          chart1 = get(Linechart25);
+          var mean25 = getMean(labels);
+
+          //PM10 Chart
+          //setup
+          var labels = getDataPm10(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'PM 10',
+              data: getDataPm10(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "µg/m\u00b3"
+                  }
+                }
+              }
+            }
+          };
+          //init
+          var Linechart10 = new Chart(
+            document.getElementById('Linechart10'),
+            config
+          );
+          chart2 = get(Linechart10);
+          var mean10 = getMean(labels);
+          
+          //Indicates the quality of air
+          if (mean25 < 110 && mean10 < 180){
+            document.getElementById("mean").innerHTML = "The quality of air is very poor";
+            if (mean25 < 55 && mean10 < 90){
+              document.getElementById("mean").innerHTML = "The quality of air is Poor";
+              if (mean25 < 30 && mean10 < 50){
+                document.getElementById("mean").innerHTML = "The quality of air is Moderate";
+                if (mean25 < 15 && mean10 < 25){
+                  document.getElementById("mean").innerHTML = "The quality of air is Fine";
+                  if (mean25 < 7 && mean10 < 12){
+                    document.getElementById("mean").innerHTML = "The quality of air is Excellent";
+                  }
+                }
+              }
+            }
+          }
+          else{
+            document.getElementById("mean").innerHTML = "The quality of air is severe";
+          }
+
+          //Calulate the number of sensors used
+          var length25 = getDataPm25(sensors).length;
+          var length10 = getDataPm10(sensors).length;
+          if (length25 <= length10){
+            if (length10 > 0){
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensors has been used during the analysis"
+            }
+            else{
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensor has been used during the analysis"
+            }
+          }
+          else{
+            if (length25 > 0){
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensors has been used during the analysis"
+            }
+            else{
+              document.getElementById("nb_sensors").innerHTML = length10 + " sensor has been used during the analysis"
+            }
+          }
+
+          //Temperatures Chart
+          //setup
+          var labels = getTemperature(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'Temperatures',
+              data: getTemperature(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "°C"
+                  }
+                }
+              }
+            }
+          };
+          //init
+          var LinechartTemperature = new Chart(
+            document.getElementById('LinechartTemperature'),
+            config
+          );
+          chart3 = get(LinechartTemperature);
+
+          //Humidity chart
+          //setup
+          var labels = getHumidity(sensors);
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: 'Humidity',
+              data: getHumidity(sensors),
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+          //config
+          var config = {
+            type: 'line',
+            data: data,
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "%"
+                  }
+                }
+              }
+            }
+          };
+          //init
+          var LinechartHumidity = new Chart(
+            document.getElementById('LinechartHumidity'),
+            config
+          );
+          chart4 = get(LinechartHumidity);
+        })
+      };
+
+    /**
+    * This function gives every PM2.5 value of the differents sensors in the list given
+    * It also takes out all the unrealistic values to try keeping precise results
+    *
+    * @author Marchal Tom
+    * @param sensors The list of sensors we have to collect the value from
+    * @return data The list of all the PM2.5 values from every sensor
+    * @precondition Every element in sensors must be sensor with the correct structure (to reach the value each time)
+    * @postcondition data regroups all the PM2.5 values from every sensor
+    */
+    function getDataPm25(sensors){
+      console.assert(sensors != [], "The list given is empty");
+      var data = [];
+      for (const sensor in sensors){
+        if (sensors[sensor].sensor.pin == 1){
+            if (sensors[sensor].sensordatavalues[0].value < 150){
+              data.push(sensors[sensor].sensordatavalues[0].value);
+            }
+        }
+      }
+      return data;
+    }
+
+    /**
+    * This function gives every PM10 value of the differents sensors in the list given
+    * It also takes out all the unrealistic values to try keeping precise results
+    *
+    * @author Marchal Tom
+    * @param sensors The list of sensors we have to collect the value from
+    * @return data The list of all the PM10 values from every sensor
+    * @precondition Every element in sensors must be sensor with the correct structure (to reach the value each time)
+    * @postcondition data regroups all the PM10 values from every sensor
+    */
+    function getDataPm10(sensors){
+      console.assert(sensors != [], "The list given is empty");
+      var data = [];
+      for (const sensor in sensors){
+        if (sensors[sensor].sensor.pin == 1){
+          var array = sensors[sensor].sensordatavalues
+          if (array.length == 2){
+            if (sensors[sensor].sensordatavalues[1].value < 190){
+              data.push(sensors[sensor].sensordatavalues[1].value);
+            }
+          }
+        }
+      }
+      return data;
+    }
+
+    /**
+    * This function gives every Temperature value of the differents sensors in the list given
+    * It also takes out all the unrealistic values to try keeping precise results
+    *
+    * @author Marchal Tom
+    * @param sensors The list of sensors we have to collect the value from
+    * @return temperatures The list of all the temperature values from every sensor
+    * @precondition Every element in sensors must be sensor with the correct structure (to reach the value each time)
+    * @postcondition temperatures regroups all the temperature values from every sensor
+    */
+    function getTemperature(sensors){
+      console.assert(sensors != [], "The list given is empty");
+      var temperatures = [];
+      for (const sensor in sensors){
+        if (sensors[sensor].sensor.pin == 7){
+          var array = sensors[sensor].sensordatavalues
+          if (array.length == 2){
+            if (sensors[sensor].sensordatavalues[1].value < 60){
+              temperatures.push(sensors[sensor].sensordatavalues[1].value);
+            }
+          }
+        }
+      }
+      return temperatures;
+    }
+
+    /**
+    * This function gives every humidity value of the differents sensors in the list given
+    * It also takes out all the unrealistic values to try keeping precise results
+    *
+    * @author Marchal Tom
+    * @param sensors The list of sensors we have to collect the value from
+    * @return humidity The list of all the humidity values from every sensor
+    * @precondition Every element in sensors must be sensor with the correct structure (to reach the value each time)
+    * @postcondition humidity regroups all the humidity values from every sensor
+    */
+    function getHumidity(sensors){
+      console.assert(sensors != [], "The list given is empty");
+      var humidity = [];
+      for (const sensor in sensors){
+        if (sensors[sensor].sensor.pin == 7 || sensors[sensor].sensor.pin == 11){
+          if(sensors[sensor].sensordatavalues[0].value < 99.9){
+            humidity.push(sensors[sensor].sensordatavalues[0].value)
+          }
+        }
+      }
+      return humidity;
+    }
+
+    /**
+    * This function collects all the data from the chart
+    * This function is the only way to get the data from a chart in a variable that then, can be used to manipulate these data
+    *
+    * @author Marchal Tom
+    * @param chart The chart we want to collect the data from
+    * @return data The data of the chart
+    * @precondition chart must contains data from a chart
+    * @postcondition all the data from the chart
+    */
+    function get(chart){
+      console.assert(chart.ctx != null, "The chart does not exist");
+      var data = chart;
+      return data;
+    }
+
+    /**
+      * This function compute the mean of the serie of data given
+      *
+      * @author Marchal Tom
+      * @param data The list of data
+      * @return mean The mean of the data
+      * @precondition data must contain at least one element
+      * @postcondition mean the mean of the list
+      */
+    function getMean(data){
+      console.assert(data.length > 0, "The list is empty");
+      var total = 0;
+      for (const value in data){
+        total +=parseFloat(data[value]);
+      }
+      var mean = total/data.length;
+      return mean;
+    }
+    </script>
+</body>
+{%endblock%}

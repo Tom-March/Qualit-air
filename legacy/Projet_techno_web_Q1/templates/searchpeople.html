@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block footercss %}
+pointer-events: auto
+{% endblock %}
+
+
+{% block header %}
+<title>FLIXLIST - Search for people</title>
+{% endblock %}
+
+
+{% block link_searchpeople %}
+{% endblock %}
+
+
+{% block content %}
+
+<legend>Search for someone</legend>
+<div class="input-group">
+    <input id="myInput" type="search" class="form-control rounded" placeholder="Search new media..." aria-label="Search"
+        aria-describedby="search-addon">
+</div>
+<br>
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Photo</th>
+            <th scope="col">Name</th>
+            <th scope="col">Birthday</th>
+        </tr>
+    </thead>
+    <tbody id='people-table'>
+        {% for person in people %}
+        {{ macros.searchpeople_row(person, pictures) }}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+
+{%block footer%}
+<div class="text-center p-3 clickablefooter">
+    Didn't find who you were looking for? Just add them yourself!
+    <a type="button" class="btn btn-outline-danger" href="{{ url_for('flixlist.addpeople') }}">Here</a>
+</div>
+{% endblock %}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/searchpeople.js') }}"
+{% endblock %}

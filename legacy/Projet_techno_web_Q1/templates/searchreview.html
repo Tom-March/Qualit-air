@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - Search for reviews</title>
+{% endblock %}
+
+
+{% block link_searchreview %}
+{% endblock %}
+
+
+{% block content %}
+
+<legend>Search a review</legend>
+<div class="input-group">
+    <input id="myInput" type="search" class="form-control rounded" placeholder="Search new media..." aria-label="Search"
+        aria-describedby="search-addon">
+</div>
+<br>
+<table class="table table-dark table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Media</th>
+            <th scope="col">Rating</th>
+            <th scope="col">Message</th>
+            <th scope="col">User</th>
+            <th scope="col">Date</th>
+        </tr>
+    </thead>
+    <tbody id='review-table'>
+        {% for review in blogs %}
+        {{ macros.review_row(review,info_review) }}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+
+{% block js_file %}
+"{{ url_for('static', filename='js/searchreview.js') }}"
+{% endblock %}

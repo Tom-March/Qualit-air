@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+
+{% block header %}
+<title>FLIXLIST - User Profile</title>
+{% endblock %}
+
+
+{% if real_current_user %}
+{% block account_link %}
+{% if current_user.username is none %}
+<a class="nav-link active" aria-current="page" href="{{ url_for('flixlist.userprofile') }}">
+    {{ current_user.first_name }} {{ current_user.last_name }}
+</a>
+{% else %}
+<a class="nav-link active" aria-current="page" href="{{ url_for('flixlist.userprofile') }}">
+    {{ current_user.username }}
+</a>
+{% endif %}
+{% endblock %}
+{% endif %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <nav aria-label="breadcrumb" class="bg-dark bg-gradient rounded-3 p-3 mb-4">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('flixlist.root') }}" class="link-light">Home</a>
+                </li>
+                {% if real_current_user %}
+                <li class="breadcrumb-item active text-white" aria-current="page">User Profile</li>
+                {% else %}
+                {% if actual_user.username is not none %}
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ actual_user.username }}'s Profile
+                </li>
+                {% else %}
+                <li class="breadcrumb-item active text-white" aria-current="page">
+                    {{ actual_user.first_name }} {{ actual_user.last_name }}'s Profile
+                </li>
+                {% endif %}
+                {% endif %}
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4">
+        <div class="card mb-4 bg-dark bg-gradient">
+            <div class="card-body text-center">
+                {% if picture is none %}
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+                    class="rounded-circle img-fluid" style="width: 150px;">
+                {% else %}
+                <img src="../static/img/profile/{{ picture }}" alt="avatar" class="rounded-circle img-fluid"
+                    style="width: 150px;">
+                {% endif %}
+                <h5 class="my-3">{{ actual_user.first_name }} {{ actual_user.last_name }}</h5>
+                {% if actual_user.username is not none %}
+                <p class="text-white-50 fw-light mb-1">{{ actual_user.username }}</p>
+                {% endif %}
+                <p class="text-white-50 fw-lighter mb-4">
+                    {% if actual_user.is_admin %}
+                    Administrator
+                    {% else %}
+                    Normal user
+                    {% endif %}
+                </p>
+                <div class="d-flex justify-content-center mb-2">
+                    {% if real_current_user %}
+                    {% set editProfileLink = url_for('flixlist.editprofile') %}
+                    <button type="button" class="btn btn-light" onclick="location.href='{{ editProfileLink }}'">
+                        Edit your profile
+                    </button>
+                    {% set myPostsLink = url_for('flixlist.myposts') %}
+                    <button type="button" class="btn btn-outline-light ms-1"
+                        onclick="location.href='{{ myPostsLink }}'">
+                        Your posts
+                    </button>
+                    {% else %}
+                    {% set theirPostsLink = url_for('flixlist.usermessages', username=username) %}
+                    <button type="button" class="btn btn-outline-light ms-1"
+                        onclick="location.href='{{ theirPostsLink }}'">
+                        Their posts
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4 mb-lg-0" hidden>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush rounded-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <i class="fas fa-globe fa-lg text-warning"></i>
+                        <p class="mb-0">https://mdbootstrap.com</p>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <i class="fab fa-github fa-lg" style="color: #333333;"></i>
+                        <p class="mb-0">mdbootstrap</p>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <i class="fab fa-twitter fa-lg" style="color: #55acee;"></i>
+                        <p class="mb-0">@mdbootstrap</p>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <i class="fab fa-instagram fa-lg" style="color: #ac2bac;"></i>
+                        <p class="mb-0">mdbootstrap</p>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <i class="fab fa-facebook-f fa-lg" style="color: #3b5998;"></i>
+                        <p class="mb-0">mdbootstrap</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card mb-4 bg-dark bg-gradient">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <p class="mb-0">Full Name</p>
+                    </div>
+                    <div class="col-sm-9">
+                        <p class="text-white text-opacity-75 mb-0">{{ actual_user.first_name }} {{
+                            actual_user.last_name }}</p>
+                    </div>
+                </div>
+                {% if actual_user.username is not none %}
+                <hr>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <p class="mb-0">Username</p>
+                    </div>
+                    <div class="col-sm-9">
+                        <p class="text-white text-opacity-75 mb-0">{{ actual_user.username }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% if real_current_user %}
+                <hr>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <p class="mb-0">Email</p>
+                    </div>
+                    <div class="col-sm-9">
+                        <p class="text-white text-opacity-75 mb-0">{{ actual_user.id }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                <hr>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <p class="mb-0">Birthday</p>
+                    </div>
+                    <div class="col-sm-9">
+                        <p class="text-white text-opacity-75 mb-0">{{ actual_user.bday.strftime('%B %#d, %Y') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- <div class="row"> -->
+        <!-- <div class="col-md-6"> -->
+        <div class="card mb-4 mb-md-0 bg-dark bg-gradient">
+            <div class="card-body">
+                <p class="mb-4 fw-light">
+                    <span class="text-danger fst-italic fw-semibold me-1">Statistics</span>of your list
+                </p>
+                <p class="mb-1" style="font-size: .77rem;">Completed ({{ "{:.2f}".format(stats[0]) }}%)</p>
+                <div class="progress rounded" style="height: 5px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats[0] }}%"
+                        aria-valuenow="{{ stats[0] }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="mt-4 mb-1" style="font-size: .77rem;">Watching ({{ "{:.2f}".format(stats[1]) }}%)</p>
+                <div class="progress rounded" style="height: 5px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats[1] }}%"
+                        aria-valuenow="{{ stats[1] }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="mt-4 mb-1" style="font-size: .77rem;">Planning to watch ({{ "{:.2f}".format(stats[2]) }}%)</p>
+                <div class="progress rounded" style="height: 5px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats[2] }}%"
+                        aria-valuenow="{{ stats[2] }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="mt-4 mb-1" style="font-size: .77rem;">Abandonned ({{ "{:.2f}".format(stats[3]) }}%)</p>
+                <div class="progress rounded" style="height: 5px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats[3] }}%"
+                        aria-valuenow="{{ stats[3] }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="mt-4 mb-1" style="font-size: .77rem;">Not categorized yet ({{ "{:.2f}".format(stats[4]) }}%)
+                </p>
+                <div class="progress rounded mb-2" style="height: 5px;">
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ stats[4] }}%"
+                        aria-valuenow="{{ stats[4] }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <!-- </div> -->
+            <!-- </div> -->
+            <div class="col-md-6" hidden>
+                <div class="card mb-4 mb-md-0">
+                    <div class="card-body">
+                        <p class="mb-4"><span class="text-primary font-italic me-1">assigment</span> Project Status
+                        </p>
+                        <p class="mb-1" style="font-size: .77rem;">Web Design</p>
+                        <div class="progress rounded" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: 80%" aria-valuenow="80"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="mt-4 mb-1" style="font-size: .77rem;">Website Markup</p>
+                        <div class="progress rounded" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: 72%" aria-valuenow="72"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="mt-4 mb-1" style="font-size: .77rem;">One Page</p>
+                        <div class="progress rounded" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: 89%" aria-valuenow="89"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="mt-4 mb-1" style="font-size: .77rem;">Mobile Template</p>
+                        <div class="progress rounded" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: 55%" aria-valuenow="55"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="mt-4 mb-1" style="font-size: .77rem;">Backend API</p>
+                        <div class="progress rounded mb-2" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: 66%" aria-valuenow="66"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
